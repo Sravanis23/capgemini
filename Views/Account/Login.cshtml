@@ -1,31 +1,31 @@
 @model RailwayReservationMVC.Models.LoginModel
 
-<h2>Login</h2>
+<form method="post" asp-action="Login" asp-controller="Account">
+    <div class="form-group">
+        <label>Email:</label>
+        <input type="email" asp-for="Email" class="form-control" required />
+    </div>
 
-@if (ViewBag.Error != null)
-{
-    <p style="color:red">@ViewBag.Error</p>
-}
+    <div class="form-group">
+        <label>Password:</label>
+        <input type="password" asp-for="Password" class="form-control" required />
+    </div>
 
-<form method="post" action="@Url.Action("Login", "Account")">
-    <label>Select Login Type:</label>
-    <select name="LoginType" required>
-        <option value="User">User</option>
-        <option value="Admin">Admin</option>
-    </select>
+    <div class="form-group">
+        <label>Login As:</label>
+        <select asp-for="LoginType" class="form-control">
+            <option value="User">User</option>
+            <option value="Admin">Admin</option>
+        </select>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    <button type="submit" class="btn btn-success">Login</button>
+
     <br />
-
-    <label>Email:</label>
-    <input type="email" name="Email" required />
-    <br />
-
-    <label>Username (For User Only):</label>
-    <input type="text" name="Username" />
-    <br />
-
-    <label>Password:</label>
-    <input type="password" name="Password" required />
-    <br />
-
-    <button type="submit">Login</button>
+    <p>Don't have an account? <a asp-action="Register" asp-controller="Account" class="btn btn-primary">Register Here</a></p>
 </form>
