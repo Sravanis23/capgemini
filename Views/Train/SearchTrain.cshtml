@@ -1,0 +1,13 @@
+<h2>Search Trains</h2>
+
+<form method="post" action="@Url.Action("SearchTrain", "Train")">
+    <label>Source:</label>
+    <input type="text" name="source" required />
+    <br />
+
+    <label>Destination:</label>
+    <input type="text" name="destination" required />
+    <br />
+
+    <button type="submit">Search</button>
+</form>

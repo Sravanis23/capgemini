@@ -1,0 +1,38 @@
+<h2>Available Trains</h2>
+
+@if (ViewBag.Message != null)
+{
+    <p style="color: red;">@ViewBag.Message</p>
+}
+else
+{
+    <table border="1">
+        <tr>
+            <th>Train ID</th>
+            <th>Train Name</th>
+            <th>Source</th>
+            <th>Destination</th>
+            <th>Departure</th>
+            <th>Arrival</th>
+            <th>Fare</th>
+            <th>Seats Available</th>
+            <th>Action</th>
+        </tr>
+        @foreach (var train in Model)
+        {
+            <tr>
+                <td>@train.TrainID</td>
+                <td>@train.TrainName</td>
+                <td>@train.Source</td>
+                <td>@train.Destination</td>
+                <td>@train.DepartureTime</td>
+                <td>@train.ArrivalTime</td>
+                <td>@train.Fare</td>
+                <td>@train.SeatsAvailable</td>
+                <td>
+                    <a href="@Url.Action("Book", "Reservation", new { trainId = train.TrainID })">Book Ticket</a>
+                </td>
+            </tr>
+        }
+    </table>
+}

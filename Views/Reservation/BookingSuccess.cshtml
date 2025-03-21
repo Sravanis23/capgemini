@@ -1,0 +1,43 @@
+@model RailwayReservationMVC.Models.Reservation
+
+<h2>Booking Successful!</h2>
+
+<p>Your ticket for train <strong>@Model.TrainName</strong> has been booked successfully.</p>
+<p><strong>PNR Number:</strong> @Model.PNRNo</p>
+<p><strong>Journey Date:</strong> @Model.JourneyDate.ToShortDateString()</p>
+<p><strong>Class Type:</strong> @Model.ClassType</p>
+
+<h3>Passenger Details:</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Gender</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Passengers != null && Model.Passengers.Any())
+        {
+            @foreach (var passenger in Model.Passengers)
+            {
+                <tr>
+                    <td>@passenger.Name</td>
+                    <td>@passenger.Age</td>
+                    <td>@passenger.Gender</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3">No passengers found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p>A confirmation email has been sent to: @Model.Email</p>
+
+<!-- Add a button to go back to homepage -->
+<a href="/" class="btn btn-primary">Go to Home</a>

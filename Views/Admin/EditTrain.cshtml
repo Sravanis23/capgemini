@@ -1,0 +1,29 @@
+@model RailwayReservationMVC.Models.Train
+
+<h2>Edit Train</h2>
+<form method="post">
+    <input type="hidden" name="TrainID" value="@Model.TrainID" />
+
+    <label>Train Name:</label>
+    <input type="text" name="TrainName" value="@Model.TrainName" required />
+
+    <label>Source:</label>
+    <input type="text" name="Source" value="@Model.Source" required />
+
+    <label>Destination:</label>
+    <input type="text" name="Destination" value="@Model.Destination" required />
+
+    <label>Departure Time:</label>
+    <input type="text" name="DepartureTime" value="@Model.DepartureTime" required />
+
+    <label>Arrival Time:</label>
+    <input type="text" name="ArrivalTime" value="@Model.ArrivalTime" required />
+
+    <label>Fare:</label>
+    <input type="number" name="Fare" value="@Model.Fare" required />
+
+    <label>Seats Available:</label>
+    <input type="number" name="SeatsAvailable" value="@Model.SeatsAvailable" required />
+
+    <button type="submit">Update Train</button>
+</form>
