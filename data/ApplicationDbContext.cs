@@ -20,6 +20,11 @@ namespace RailwayReservationMVC.Data
                 .Property(t => t.Fare)
                 .HasColumnType("decimal(10,2)"); // Precision: 10 digits, 2 decimal places
 
+            // ✅ Define precision for TotalFare in Reservation table
+            modelBuilder.Entity<Reservation>()
+                .Property(r => r.TotalFare)
+                .HasColumnType("decimal(10,2)"); // Prevents truncation issues
+
             // ✅ Define Quota relationship with Train
             modelBuilder.Entity<Quota>()
                 .HasOne(q => q.Train)

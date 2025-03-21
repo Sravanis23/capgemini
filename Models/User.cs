@@ -8,7 +8,9 @@ namespace RailwayReservationMVC.Models
         public int Id { get; set; } // Primary Key
         public string Email { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
+
+          public string PasswordHash { get; set; } = string.Empty;
         public string UserType { get; set; } = "User";
-        public string Password { get; set; } = string.Empty;
+    
     }
 }

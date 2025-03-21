@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RailwayReservationMVC.Data;
 using RailwayReservationMVC.Models;
 using RailwayReservationMVC.Services;
+using RailwayReservationMVC.Models.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace RailwayReservationMVC.Controllers
@@ -19,6 +20,7 @@ namespace RailwayReservationMVC.Controllers
             _quotaService = quotaService;
         }
 
+        // ✅ Step 1: Booking Form
         [HttpGet]
         public IActionResult Book(int trainId)
         {
@@ -28,78 +30,112 @@ namespace RailwayReservationMVC.Controllers
                 return NotFound("Train not found.");
             }
 
-            // ✅ Fetch available quotas for the selected train
-            var quotas = _context.Quota.Where(q => q.TrainID == trainId).ToList();
+            var quotas = _context.Quota
+                .Where(q => q.TrainID == trainId)
+                .ToList();
 
-            // ✅ Define available class types dynamically
             var classTypes = new List<string> { "Sleeper", "3rd AC", "2nd AC", "1st AC", "Economy", "Business" };
 
-            var bookingModel = new Reservation
+            var viewModel = new ReservationViewModel
             {
-                TrainID = trainId,
-                TrainName = train.TrainName
+                TrainID = train.TrainID,
+                TrainName = train.TrainName ?? "Unknown Train", // Prevents null error
+                Quotas = quotas,
+                ClassTypes = classTypes,
+                Passengers = new List<Passenger>() // Ensure it's initialized
             };
 
-            ViewBag.Quotas = quotas;       // ✅ Send quota data to the view
-            ViewBag.ClassTypes = classTypes; // ✅ Send class type options to the view
-            return View(bookingModel);
+            return View(viewModel);
         }
 
+        // ✅ Step 2: Process Booking
         [HttpPost]
-        public IActionResult Book(Reservation reservation, List<Passenger> passengers)
+        [ValidateAntiForgeryToken]
+        public IActionResult Book(ReservationViewModel model)
         {
-            var train = _context.Trains.Find(reservation.TrainID);
+            if (model.Passengers == null || model.Passengers.Count == 0)
+            {
+                ModelState.AddModelError("", "At least one passenger must be added.");
+                return View(model);
+            }
+
+            var train = _context.Trains.Find(model.TrainID);
             if (train == null)
             {
                 return NotFound("Train not found.");
             }
 
-            var quota = _context.Quota.FirstOrDefault(q => q.QuotaID == reservation.QuotaID);
+            var quota = _context.Quota.FirstOrDefault(q => q.QuotaID == model.QuotaID);
             if (quota == null)
             {
-                return BadRequest("Invalid quota selected.");
+                ModelState.AddModelError("", "Invalid quota selected.");
+                return View(model);
             }
 
-            if (passengers == null || passengers.Count == 0)
+            int totalSeatsRequested = model.Passengers.Count;
+
+            // ✅ Check seat availability
+            if (!_quotaService.CheckSeatAvailability(model.TrainID, model.QuotaID, totalSeatsRequested))
             {
-                return BadRequest("At least one passenger must be added.");
+                ModelState.AddModelError("", "Not enough seats available in the selected quota.");
+                return View(model);
             }
 
-            int totalSeatsRequested = passengers.Count;
-            if (!_quotaService.CheckSeatAvailability(reservation.TrainID, reservation.QuotaID, totalSeatsRequested))
+            // ✅ Allocate seats
+            _quotaService.AllocateSeats(model.TrainID, model.QuotaID, totalSeatsRequested);
+
+            // ✅ Generate Unique PNR
+            var reservation = new Reservation
             {
-                return BadRequest("Not enough seats available in the selected quota.");
-            }
+                PNRNo = new Random().Next(100000, 999999), // Use GeneratePNR method to generate a unique PNR
+                TrainID = model.TrainID,
+                TrainName = train.TrainName ?? "Unknown Train",
+                JourneyDate = model.JourneyDate,
+                ClassType = model.ClassType ?? "Sleeper",
+                QuotaID = model.QuotaID,
+                SeatsBooked = totalSeatsRequested,
+                Email = model.Email,
+                PaymentStatus = "Pending",
+                CancellationStatus = "Active"
+            };
 
-            _quotaService.AllocateSeats(reservation.TrainID, reservation.QuotaID, totalSeatsRequested);
-
-            // ✅ Assign TrainName before saving
-            reservation.TrainName = train.TrainName;
-            reservation.SeatsBooked = totalSeatsRequested;
-
-            // ✅ Save reservation first
-            _context.Reservations.Add(reservation);
-            _context.SaveChanges();
-
-            // ✅ Link passengers to reservation
-            foreach (var passenger in passengers)
+            using (var transaction = _context.Database.BeginTransaction())
             {
-                passenger.ReservationID = reservation.PNRNo;
-                _context.Passengers.Add(passenger);
-            }
+                try
+                {
+                    _context.Reservations.Add(reservation);
+                    _context.SaveChanges();
 
-            try
-            {
-                _context.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error saving reservation: {ex.Message}");
+                    // Add passengers to the reservation
+                    foreach (var passengerVM in model.Passengers)
+                    {
+                        var passenger = new Passenger
+                        {
+                            Name = passengerVM.Name,
+                            Age = passengerVM.Age,
+                            Gender = passengerVM.Gender,
+                            PassengerType = passengerVM.PassengerType,
+                            ReservationID = reservation.PNRNo // Associate passenger with PNR
+                        };
+
+                        _context.Passengers.Add(passenger);
+                    }
+
+                    _context.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    ModelState.AddModelError("", $"Error saving reservation: {ex.Message}");
+                    return View(model);
+                }
             }
 
             return RedirectToAction("BookingSuccess", new { pnrNo = reservation.PNRNo });
         }
 
+        // ✅ Step 3: Booking Success Page
         [HttpGet]
         public IActionResult BookingSuccess(int pnrNo)
         {
@@ -114,22 +150,36 @@ namespace RailwayReservationMVC.Controllers
 
             var passengers = _context.Passengers
                 .Where(p => p.ReservationID == reservation.PNRNo)
-                .Select(p => new { p.Name, p.Age, p.Gender })
+                .Select(p => new Passenger
+                {
+                    Name = p.Name,
+                    Age = p.Age,
+                    Gender = p.Gender,
+                    PassengerType = p.PassengerType
+                })
                 .ToList();
 
-            // ✅ Create ViewModel for booking success
-            var viewModel = new
+            var viewModel = new BookingSuccessViewModel
             {
-                reservation.PNRNo,
-                reservation.TrainName,
-                reservation.JourneyDate,
-                reservation.ClassType,
-                reservation.SeatsBooked,
-                reservation.Email,
+                PNRNo = reservation.PNRNo,
+                TrainName = reservation.TrainName ?? "Unknown Train",
+                JourneyDate = reservation.JourneyDate,
+                ClassType = reservation.ClassType ?? "Sleeper",
+                SeatsBooked = reservation.SeatsBooked,
+                Email = reservation.Email ?? "Not Provided",
                 Passengers = passengers
             };
 
             return View(viewModel);
+        }
+
+        // ✅ Method to generate unique PNR number
+        private string GeneratePNR(ReservationViewModel model)
+        {
+            var random = new Random();
+            // PNR format: "TrainID+UserID+Date+RandomNumber"
+            string pnr = $"{model.TrainID}{model.Email.GetHashCode()}{model.JourneyDate:yyyyMMdd}{random.Next(1000, 9999)}";
+            return pnr;
         }
     }
 }

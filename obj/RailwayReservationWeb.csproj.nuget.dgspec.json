@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\srava\\Desktop\\RailwayReservationWeb\\RailwayReservationWeb\\RailwayReservationWeb.csproj": {}
+    "D:\\projects\\capgemini\\RailwayReservationWeb.csproj": {}
   },
   "projects": {
-    "C:\\Users\\srava\\Desktop\\RailwayReservationWeb\\RailwayReservationWeb\\RailwayReservationWeb.csproj": {
+    "D:\\projects\\capgemini\\RailwayReservationWeb.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\srava\\Desktop\\RailwayReservationWeb\\RailwayReservationWeb\\RailwayReservationWeb.csproj",
+        "projectUniqueName": "D:\\projects\\capgemini\\RailwayReservationWeb.csproj",
         "projectName": "RailwayReservationWeb",
-        "projectPath": "C:\\Users\\srava\\Desktop\\RailwayReservationWeb\\RailwayReservationWeb\\RailwayReservationWeb.csproj",
+        "projectPath": "D:\\projects\\capgemini\\RailwayReservationWeb.csproj",
         "packagesPath": "C:\\Users\\srava\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\srava\\Desktop\\RailwayReservationWeb\\RailwayReservationWeb\\obj\\",
+        "outputPath": "D:\\projects\\capgemini\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -51,6 +51,20 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.3, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.3, )"
+            },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
               "version": "[9.0.3, )"

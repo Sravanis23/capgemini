@@ -1,18 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
 using RailwayReservationMVC.Models;
+using RailwayReservationMVC.Data;
 using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
 using System.Linq;
+using BCrypt.Net;
+using Microsoft.Extensions.Logging;
 
 namespace RailwayReservationMVC.Controllers
 {
     public class AccountController : Controller
     {
-        private static readonly List<User> Users = new List<User>
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<AccountController> _logger;
+
+        public AccountController(ApplicationDbContext context, ILogger<AccountController> logger)
         {
-            new User { Id = 1, Email = "user1@email.com", Username = "user1", Password = "user123", UserType = "User" },
-            new User { Id = 2, Email = "user2@email.com", Username = "user2", Password = "user456", UserType = "User" }
-        };
+            _context = context;
+            _logger = logger;
+        }
 
         // GET: Register Page
         [HttpGet]
@@ -23,28 +28,29 @@ namespace RailwayReservationMVC.Controllers
 
         // POST: Register User
         [HttpPost]
-        public IActionResult Register(User model)
+        public IActionResult Register(RegisterViewModel model)
         {
-            if (Users.Any(u => u.Email == model.Email))
+            if (_context.Users.Any(u => u.Email == model.Email))
             {
                 ViewBag.Error = "Email already registered!";
                 return View();
             }
 
-            // Assign new Id (incremental)
-            int newId = Users.Count > 0 ? Users.Max(u => u.Id) + 1 : 1;
+            // ✅ Hash the password before saving
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password ?? "");
 
-            Users.Add(new User
+            var newUser = new User
             {
-                Id = newId,
-                Email = model.Email,
-                Username = model.Username,
-                Password = model.Password,
+                Email = model.Email!,
+                Username = model.Username!,
+                PasswordHash = hashedPassword,
                 UserType = "User"
-            });
+            };
 
-            Console.WriteLine($"✅ New User Registered: {model.Email}");
+            _context.Users.Add(newUser);
+            _context.SaveChanges();  // ✅ Save user to the database
 
+            _logger.LogInformation($"✅ New User Registered: {model.Email}");
             return RedirectToAction("Login");
         }
 
@@ -59,31 +65,62 @@ namespace RailwayReservationMVC.Controllers
         [HttpPost]
         public IActionResult Login(LoginModel model)
         {
-            Console.WriteLine($"🔍 Attempting Login: {model.Email}, Type: {model.LoginType}");
+            _logger.LogInformation($"🔍 Attempting Login: {model.Email}, Type: {model.LoginType}");
 
             if (model.LoginType == "Admin")
             {
                 if (model.Email == "admin@railway.com" && model.Password == "admin123")
                 {
                     HttpContext.Session.SetString("UserRole", "Admin");
-                    Console.WriteLine("✅ Admin Login Successful!");
+                    _logger.LogInformation("✅ Admin Login Successful!");
                     return RedirectToAction("Dashboard", "Admin");
                 }
             }
             else if (model.LoginType == "User")
             {
-                var user = Users.FirstOrDefault(u => u.Email == model.Email && u.Password == model.Password);
-                if (user != null)
+                var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
+
+                // 🔴 Check if user exists
+                if (user == null)
                 {
-                    HttpContext.Session.SetString("UserRole", "User");
-                    HttpContext.Session.SetString("Username", user.Username);
-                    Console.WriteLine($"✅ User Login Successful: {user.Username}");
-                    return RedirectToAction("SearchTrain", "Train");
+                    ViewBag.Error = "Invalid email or password!";
+                    _logger.LogWarning("❌ Login Failed: User not found.");
+                    return View();
                 }
+
+                // 🔴 Check if PasswordHash is empty
+                if (string.IsNullOrEmpty(user.PasswordHash))
+                {
+                    ViewBag.Error = "Password not set. Please reset your password.";
+                    _logger.LogWarning("❌ Login Failed: PasswordHash is missing.");
+                    return View();
+                }
+
+                // 🔴 Check if stored password is a valid BCrypt hash
+                if (!user.PasswordHash.StartsWith("$2a$"))
+                {
+                    ViewBag.Error = "Invalid stored password format.";
+                    _logger.LogWarning("❌ Login Failed: PasswordHash format incorrect.");
+                    return View();
+                }
+
+                // ✅ Verify the password using BCrypt
+                if (!BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
+                {
+                    ViewBag.Error = "Invalid email or password!";
+                    _logger.LogWarning("❌ Login Failed: Incorrect password.");
+                    return View();
+                }
+
+                // ✅ Login successful
+                HttpContext.Session.SetString("UserRole", "User");
+                HttpContext.Session.SetString("Username", user.Username);
+                _logger.LogInformation($"✅ User Login Successful: {user.Username}");
+                return RedirectToAction("SearchTrain", "Train");
             }
 
             ViewBag.Error = "Invalid credentials!";
-            Console.WriteLine("❌ Login Failed: Invalid credentials");
+            _logger.LogWarning("❌ Login Failed: Invalid credentials");
             return View();
         }
 
@@ -91,7 +128,7 @@ namespace RailwayReservationMVC.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            Console.WriteLine("🔴 User Logged Out");
+            _logger.LogInformation("🔴 User Logged Out");
             return RedirectToAction("Login");
         }
     }

@@ -1,57 +1,97 @@
-@model RailwayReservationMVC.Models.Reservation
+@model RailwayReservationMVC.Models.ViewModels.ReservationViewModel
 
-<h2>Book a Ticket for @Model.TrainName</h2>
+@{
+    ViewBag.Title = "Book Ticket";
+}
 
-<form method="post" action="@Url.Action("Book", "Reservation")">
-    <input type="hidden" name="TrainID" value="@Model.TrainID" />
-    <input type="hidden" name="TrainName" value="@Model.TrainName" />
+<div class="container d-flex justify-content-center">
+    <div class="glass-container col-md-6 p-4">
+        <h2 class="text-center">Book a Ticket for @Model.TrainName</h2>
 
-    <label>Passenger Name:</label>
-    <input type="text" name="PassengerName" required class="form-control" />
+        <form method="post" action="@Url.Action("Book", "Reservation")">
+            @Html.AntiForgeryToken()
 
-    <label>Age:</label>
-    <input type="number" name="Age" required class="form-control" min="1" />
+            <input type="hidden" name="TrainID" value="@Model.TrainID" />
 
-    <label>Gender:</label>
-    <select name="Gender" class="form-control">
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-    </select>
+            <!-- Passenger Selection -->
+            <label>Number of Passengers:</label>
+            <select id="numPassengers" name="numPassengers" class="form-select" onchange="generatePassengerForms()">
+                @for (int i = 1; i <= 6; i++)
+                {
+                    <option value="@i">@i</option>
+                }
+            </select>
 
-    <label>Passenger Type:</label>
-    <select name="PassengerType" class="form-control">
-        <option value="Regular">Regular</option>
-        <option value="Senior Citizen">Senior Citizen</option>
-        <option value="Pregnant">Pregnant</option>
-    </select>
+            <div id="passengerForms"></div>
 
-    <label>Journey Date:</label>
-    <input type="date" name="JourneyDate" required class="form-control" />
+            <!-- Journey Date -->
+            <label>Journey Date:</label>
+            <input type="date" name="JourneyDate" id="JourneyDate" required class="form-control" />
 
-    <!-- ✅ Dynamic Class Type Selection -->
-    <label for="ClassType">Class Type:</label>
-    <select name="ClassType" class="form-control">
-        @foreach (var classType in ViewBag.ClassTypes)
-        {
-            <option value="@classType">@classType</option>
-        }
-    </select>
+            <!-- Class Type -->
+            <label for="ClassType">Class Type:</label>
+            <select name="ClassType" class="form-control">
+                @foreach (var classType in Model.ClassTypes ?? new List<string>())
+                {
+                    <option value="@classType">@classType</option>
+                }
+            </select>
 
-    <!-- ✅ Quota Selection -->
-    <label for="QuotaID">Select Quota:</label>
-    <select id="QuotaID" name="QuotaID" class="form-control">
-        @foreach (var quota in ViewBag.Quotas)
-        {
-            <option value="@quota.QuotaID">@quota.QuotaType - Seats Available: @quota.SeatsAvailable</option>
-        }
-    </select>
+            <!-- Quota Selection -->
+            <label for="QuotaID">Select Quota:</label>
+            <select id="QuotaID" name="QuotaID" class="form-control">
+                @foreach (var quota in Model.Quotas)
+                {
+                    <option value="@quota.QuotaID">@quota.QuotaType - Seats Available: @quota.SeatsAvailable</option>
+                }
+            </select>
 
-    <!-- ✅ Seats Booked Input -->
-    <label>Seats to Book:</label>
-    <input type="number" name="SeatsBooked" required class="form-control" min="1" />
+            <label>Email (for confirmation):</label>
+            <input type="email" name="Email" required class="form-control" />
 
-    <label>Email (for confirmation):</label>
-    <input type="email" name="Email" required class="form-control" />
+            <button type="submit" class="btn btn-primary w-100 mt-3">Book Ticket</button>
+        </form>
+    </div>
+</div>
 
-    <button type="submit" class="btn btn-primary">Book Ticket</button>
-</form>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    generatePassengerForms(); 
+
+    let today = new Date().toISOString().split("T")[0];
+    document.getElementById("JourneyDate").setAttribute("min", today);
+});
+
+function generatePassengerForms() {
+    let num = document.getElementById("numPassengers").value;
+    let container = document.getElementById("passengerForms");
+    container.innerHTML = "";
+
+    for (let i = 0; i < num; i++) {
+        let form = `
+            <div class="card mt-3 p-3 glass-container">
+                <h5>Passenger ${i + 1}</h5>
+                <label>Name:</label>
+                <input type="text" name="Passengers[${i}].Name" class="form-control" required>
+
+                <label>Age:</label>
+                <input type="number" name="Passengers[${i}].Age" class="form-control" required min="1">
+
+                <label>Gender:</label>
+                <select name="Passengers[${i}].Gender" class="form-select">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+
+                <label>Passenger Type:</label>
+                <select name="Passengers[${i}].PassengerType" class="form-select">
+                    <option value="Regular">Regular</option>
+                    <option value="Senior Citizen">Senior Citizen</option>
+                    <option value="Pregnant">Pregnant</option>
+                </select>
+            </div>
+        `;
+        container.innerHTML += form;
+    }
+}
+</script>
