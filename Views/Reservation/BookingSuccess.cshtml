@@ -2,10 +2,12 @@
 
 <h2>Booking Successful!</h2>
 
-<p>Your ticket for train <strong>@Model.TrainName</strong> has been booked successfully.</p>
-<p><strong>PNR Number:</strong> @Model.PNRNo</p>
-<p><strong>Journey Date:</strong> @Model.JourneyDate.ToShortDateString()</p>
-<p><strong>Class Type:</strong> @Model.ClassType</p>
+<p>Your PNR: <strong>@Model.PNRNo</strong></p>
+<p>Train Name: <strong>@Model.TrainName</strong></p>
+<p>Journey Date: <strong>@Model.JourneyDate.ToString("dd/MM/yyyy")</strong></p>
+<p>Class Type: <strong>@Model.ClassType</strong></p>
+<p>Seats Booked: <strong>@Model.SeatsBooked</strong></p>
+<p>Email: <strong>@Model.Email</strong></p>
 
 <h3>Passenger Details:</h3>
 <table class="table">
@@ -14,6 +16,7 @@
             <th>Name</th>
             <th>Age</th>
             <th>Gender</th>
+            <th>Passenger Type</th>
         </tr>
     </thead>
     <tbody>
@@ -25,6 +28,7 @@
                     <td>@passenger.Name</td>
                     <td>@passenger.Age</td>
                     <td>@passenger.Gender</td>
+                    <td>@passenger.PassengerType</td>
                 </tr>
             }
         }
@@ -39,5 +43,6 @@
 
 <p>A confirmation email has been sent to: @Model.Email</p>
 
+<a href="@Url.Action("Book", "Reservation", new { trainId = Model.TrainID })">Book Another Ticket</a>
 <!-- Add a button to go back to homepage -->
 <a href="/" class="btn btn-primary">Go to Home</a>

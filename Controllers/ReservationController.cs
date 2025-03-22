@@ -87,7 +87,6 @@ namespace RailwayReservationMVC.Controllers
             // ✅ Generate Unique PNR
             var reservation = new Reservation
             {
-                PNRNo = new Random().Next(100000, 999999), // Use GeneratePNR method to generate a unique PNR
                 TrainID = model.TrainID,
                 TrainName = train.TrainName ?? "Unknown Train",
                 JourneyDate = model.JourneyDate,
@@ -98,6 +97,11 @@ namespace RailwayReservationMVC.Controllers
                 PaymentStatus = "Pending",
                 CancellationStatus = "Active"
             };
+
+            _context.Reservations.Add(reservation);
+            _context.SaveChanges();
+
+            
 
             using (var transaction = _context.Database.BeginTransaction())
             {
