@@ -69,5 +69,33 @@
     </tbody>
 </table>
 
+<h2>Reservation Details</h2>
+<p>PNR Number: @Model.PNRNo</p>
+<p>Total Fare: ₹@Model.TotalFare</p>
+<p>Payment Status: <strong>@Model.PaymentStatus</strong></p>
+
+@if (Model.PaymentStatus == "Pending")
+{
+    <form asp-controller="Reservation" asp-action="MakePayment" method="post">
+        <input type="hidden" name="pnrNo" value="@Model.PNRNo" />
+        <button type="submit" class="btn btn-success">Make Payment</button>
+    </form>
+}
+else
+{
+    <p class="text-success">Payment already completed!</p>
+}
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+<form method="post" asp-controller="Reservation" asp-action="UpdateTotalFare">
+    <input type="hidden" name="reservationId" value="@Model.PNRNo" />
+    <button type="submit" class="btn btn-primary">Update Fare</button>
+</form>
+
+
 <a href="@Url.Action("CheckStatus", "Reservation")" class="btn btn-secondary">Check Another PNR</a>
 <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Go to Home</a>

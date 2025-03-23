@@ -176,8 +176,7 @@ namespace RailwayReservationMVC.Controllers
                 SeatsBooked = reservation.SeatsBooked,
                 Email = reservation.Email ?? "Not Provided",
                 Passengers = passengers
-            };
-
+            }; 
             return View(viewModel);
         }
 
@@ -269,8 +268,75 @@ public IActionResult CheckStatus(int pnrNo)
         ViewBag.ErrorMessage = "Reservation not found!";
         return View();
     }
+    if (reservation.JourneyDate == null)
+    {
+        reservation.JourneyDate = DateTime.MinValue; // Default value to avoid errors
+    }
 
     return View("ReservationStatus", reservation);
+}
+[HttpPost]
+public IActionResult MakePayment(int pnrNo)
+{
+    var reservation = _context.Reservations.FirstOrDefault(r => r.PNRNo == pnrNo);
+    
+    if (reservation == null)
+    {
+        return NotFound("Reservation not found.");
+    }
+
+    // Simulate payment processing (You can integrate Razorpay, Stripe, PayU, etc.)
+    reservation.PaymentStatus = "Completed";
+
+    _context.SaveChanges();
+
+    TempData["Message"] = "Payment successful!";
+
+    return RedirectToAction("CheckStatus", new { pnrNo = pnrNo });
+}
+
+
+public IActionResult UpdateTotalFare(int reservationId)
+{
+    var reservation = _context.Reservations.FirstOrDefault(r => r.PNRNo == reservationId);
+    if (reservation == null)
+    {
+        return NotFound("Reservation not found.");
+    }
+
+    var train = _context.Trains.FirstOrDefault(t => t.TrainID == reservation.TrainID);
+    if (train == null)
+    {
+        return NotFound("Train not found.");
+    }
+
+    // Calculate Total Fare
+    reservation.TotalFare = train.Fare * reservation.SeatsBooked;
+
+    // Update the database
+    _context.Reservations.Update(reservation);
+    _context.SaveChanges();
+
+    return RedirectToAction("CheckStatus", new { pnrNo = reservationId });
+}
+
+
+[HttpPost]
+public IActionResult Create(Reservation reservation)
+{
+    var train = _context.Trains.FirstOrDefault(t => t.TrainID == reservation.TrainID);
+    if (train == null)
+    {
+        return NotFound("Train not found.");
+    }
+
+    // Calculate Total Fare before saving
+    reservation.TotalFare = train.Fare * reservation.SeatsBooked;
+
+    _context.Reservations.Add(reservation);
+    _context.SaveChanges();
+
+    return RedirectToAction("CheckStatus", new { pnrNo = reservation.PNRNo });
 }
 
 
