@@ -1,0 +1,18 @@
+@{
+    ViewData["Title"] = "Check Reservation Status";
+}
+
+<h2>Check Reservation Status</h2>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+}
+
+<form method="post" asp-action="CheckStatus">
+    <div class="mb-3">
+        <label for="pnrNo" class="form-label">Enter PNR Number:</label>
+        <input type="number" class="form-control" id="pnrNo" name="pnrNo" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Check Status</button>
+</form>

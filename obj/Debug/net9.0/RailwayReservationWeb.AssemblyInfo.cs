@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RailwayReservationWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3211c4a76a21ae911d6e7179b643c73d4ea45631")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+74813e4892b0f0e1956a51a621a97bc25f495f10")]
 [assembly: System.Reflection.AssemblyProductAttribute("RailwayReservationWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RailwayReservationWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

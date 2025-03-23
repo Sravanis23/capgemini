@@ -140,6 +140,9 @@ namespace RailwayReservationMVC.Controllers
             return RedirectToAction("BookingSuccess", new { pnrNo = reservation.PNRNo });
         }
 
+        
+
+        
         // ✅ Step 3: Booking Success Page
         [HttpGet]
         public IActionResult BookingSuccess(int pnrNo)
@@ -194,5 +197,82 @@ namespace RailwayReservationMVC.Controllers
 
             return pnr;
         }
+
+        [HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult Cancel(int pnrNo)
+{
+    var reservation = _context.Reservations.FirstOrDefault(r => r.PNRNo == pnrNo);
+    
+    if (reservation == null)
+    {
+        return NotFound("Reservation not found.");
+    }
+
+    if (reservation.CancellationStatus.ToLower() == "cancelled")
+    {
+        return BadRequest("Reservation is already cancelled.");
+    }
+
+    using (var transaction = _context.Database.BeginTransaction())
+    {
+        try
+        {
+            // ✅ Mark the reservation as cancelled
+            reservation.CancellationStatus = "Cancelled";
+            _context.Reservations.Update(reservation);
+
+            // ✅ Free up the allocated seats
+            var quota = _context.Quota.FirstOrDefault(q => q.QuotaID == reservation.QuotaID);
+            if (quota != null)
+            {
+                quota.SeatsAvailable += reservation.SeatsBooked;
+                _context.Quota.Update(quota);
+            }
+
+            _context.SaveChanges();
+            transaction.Commit();
+        }
+        catch (Exception ex)
+        {
+            transaction.Rollback();
+            ModelState.AddModelError("", $"Error cancelling reservation: {ex.Message}");
+            return RedirectToAction("BookingDetails", new { pnrNo });
+        }
+    }
+
+    return RedirectToAction("BookingCancelled", new { pnrNo });
+}
+
+[HttpGet]
+public IActionResult BookingCancelled(int pnrNo)
+{
+    return View(pnrNo);
+}
+
+
+[HttpGet]
+public IActionResult CheckStatus()
+{
+    return View();
+}
+
+[HttpPost]
+public IActionResult CheckStatus(int pnrNo)
+{
+    var reservation = _context.Reservations
+        .Include(r => r.Passengers) // Include related passengers
+        .FirstOrDefault(r => r.PNRNo == pnrNo);
+
+    if (reservation == null)
+    {
+        ViewBag.ErrorMessage = "Reservation not found!";
+        return View();
+    }
+
+    return View("ReservationStatus", reservation);
+}
+
+
     }
 }

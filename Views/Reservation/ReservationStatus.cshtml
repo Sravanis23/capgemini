@@ -1,0 +1,73 @@
+@model RailwayReservationMVC.Models.Reservation
+
+@{
+    ViewData["Title"] = "Reservation Status";
+}
+
+<h2>Reservation Status</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>PNR No</th>
+        <td>@Model.PNRNo</td>
+    </tr>
+    <tr>
+        <th>Train Name</th>
+        <td>@Model.TrainName</td>
+    </tr>
+    <tr>
+        <th>Journey Date</th>
+        <td>@Model.JourneyDate.ToShortDateString()</td>
+    </tr>
+    <tr>
+        <th>Class</th>
+        <td>@Model.ClassType</td>
+    </tr>
+    <tr>
+        <th>Seats Booked</th>
+        <td>@Model.SeatsBooked</td>
+    </tr>
+    <tr>
+        <th>Payment Status</th>
+        <td>@Model.PaymentStatus</td>
+    </tr>
+    <tr>
+        <th>Cancellation Status</th>
+        <td>
+            @if (Model.CancellationStatus.ToLower() == "cancelled")
+            {
+                <span class="text-danger">Cancelled</span>
+            }
+            else
+            {
+                <span class="text-success">Active</span>
+            }
+        </td>
+    </tr>
+</table>
+
+<h4>Passengers:</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var passenger in Model.Passengers)
+        {
+            <tr>
+                <td>@passenger.Name</td>
+                <td>@passenger.Age</td>
+                <td>@passenger.Gender</td>
+                <td>@passenger.PassengerType</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("CheckStatus", "Reservation")" class="btn btn-secondary">Check Another PNR</a>
+<a href="@Url.Action("Index", "Home")" class="btn btn-primary">Go to Home</a>

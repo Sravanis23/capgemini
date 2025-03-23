@@ -41,6 +41,11 @@
     </tbody>
 </table>
 
+<form asp-action="Cancel" asp-controller="Reservation" method="post">
+    <input type="hidden" name="pnrNo" value="@Model.PNRNo" />
+    <button type="submit" class="btn btn-danger">Cancel Ticket</button>
+</form>
+
 <p>A confirmation email has been sent to: <strong>@Model.Email</strong></p>
 
 <!-- Book another ticket link (Removed trainId as it's not in ViewModel) -->

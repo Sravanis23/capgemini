@@ -60,8 +60,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVzZXJ2YXRpb25cQm9vay5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/projects/capgemini/Views/Reservation/BookingCancelled.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVzZXJ2YXRpb25cQm9va2luZ0NhbmNlbGxlZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/projects/capgemini/Views/Reservation/BookingSuccess.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVzZXJ2YXRpb25cQm9va2luZ1N1Y2Nlc3MuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/projects/capgemini/Views/Reservation/CheckStatus.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVzZXJ2YXRpb25cQ2hlY2tTdGF0dXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/projects/capgemini/Views/Reservation/ReservationStatus.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVzZXJ2YXRpb25cUmVzZXJ2YXRpb25TdGF0dXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/projects/capgemini/Views/Shared/Error.cshtml]
