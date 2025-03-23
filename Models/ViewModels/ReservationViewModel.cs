@@ -26,10 +26,11 @@ namespace RailwayReservationMVC.Models.ViewModels
          {
             "Sleeper", "3rd AC", "2nd AC", "1st AC", "Economy", "Business"
         };
+        
+        public List<Passenger> Passengers { get; set; } = new List<Passenger>(); // ✅ FIXED: Added Property
+
         [Required]
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
-
-        public List<Passenger> Passengers { get; set; } = new List<Passenger>(); // ✅ FIXED: Added Property
     }
 }

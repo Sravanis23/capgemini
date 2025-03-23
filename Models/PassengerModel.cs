@@ -8,9 +8,6 @@ namespace RailwayReservationMVC.Models
         [Key]
         public int PassengerID { get; set; }  // Primary Key
 
-        [ForeignKey("User")]
-        public int UserID { get; set; }  // Foreign Key from Users Table
-
         public string Name { get; set; } = string.Empty;
         public string Gender { get; set; } = string.Empty;
         public int Age { get; set; }
@@ -18,7 +15,7 @@ namespace RailwayReservationMVC.Models
 
         // ✅ Add ReservationID as a Foreign Key
         [ForeignKey("Reservation")]
-        public int ReservationID { get; set; }
+        public int PNRNo { get; set; }
 
         // ✅ Navigation property for Reservation
         public virtual Reservation? Reservation { get; set; }

@@ -15,6 +15,9 @@ namespace RailwayReservationMVC.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Passenger>()
+            .HasKey(p => p.PassengerID);  // ✅ Explicitly defining the PK
+
             // ✅ Define precision for Fare in Train table
             modelBuilder.Entity<Train>()
                 .Property(t => t.Fare)
@@ -50,7 +53,7 @@ namespace RailwayReservationMVC.Data
             modelBuilder.Entity<Passenger>()
                 .HasOne(p => p.Reservation)
                 .WithMany(r => r.Passengers)  // ✅ Reservation can have multiple passengers
-                .HasForeignKey(p => p.ReservationID)
+                .HasForeignKey(p => p.PNRNo)
                 .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);

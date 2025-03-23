@@ -8,8 +8,8 @@ namespace RailwayReservationMVC.Models
     public class Reservation
     {
         [Key]
-        public int PNRNo { get; set; } // Primary Key
-
+        public int PNRNo { get; set; } 
+        
         [ForeignKey("Train")]
         public int TrainID { get; set; } // Foreign Key from Trains Table
 

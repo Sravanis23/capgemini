@@ -39,10 +39,10 @@ namespace RailwayReservationMVC.Controllers
             var viewModel = new ReservationViewModel
             {
                 TrainID = train.TrainID,
-                TrainName = train.TrainName ?? "Unknown Train", // Prevents null error
+                TrainName = train.TrainName ?? "Unknown Train",
                 Quotas = quotas,
                 ClassTypes = classTypes,
-                Passengers = new List<Passenger>() // Ensure it's initialized
+                Passengers = new List<Passenger>()
             };
 
             return View(viewModel);
@@ -84,9 +84,13 @@ namespace RailwayReservationMVC.Controllers
             // ✅ Allocate seats
             _quotaService.AllocateSeats(model.TrainID, model.QuotaID, totalSeatsRequested);
 
-            // ✅ Generate Unique PNR
+            // ✅ Generate Unique PNR Automatically
+            int pnrNo = GeneratePNR();
+
+            // ✅ Create and save reservation
             var reservation = new Reservation
             {
+                PNRNo = pnrNo,
                 TrainID = model.TrainID,
                 TrainName = train.TrainName ?? "Unknown Train",
                 JourneyDate = model.JourneyDate,
@@ -98,19 +102,16 @@ namespace RailwayReservationMVC.Controllers
                 CancellationStatus = "Active"
             };
 
-            _context.Reservations.Add(reservation);
-            _context.SaveChanges();
-
-            
-
             using (var transaction = _context.Database.BeginTransaction())
             {
                 try
                 {
+                    // ✅ Add reservation first
+                    
                     _context.Reservations.Add(reservation);
                     _context.SaveChanges();
 
-                    // Add passengers to the reservation
+                    // ✅ Add passengers after saving reservation to get valid PNRNo
                     foreach (var passengerVM in model.Passengers)
                     {
                         var passenger = new Passenger
@@ -119,7 +120,7 @@ namespace RailwayReservationMVC.Controllers
                             Age = passengerVM.Age,
                             Gender = passengerVM.Gender,
                             PassengerType = passengerVM.PassengerType,
-                            ReservationID = reservation.PNRNo // Associate passenger with PNR
+                            PNRNo = reservation.PNRNo
                         };
 
                         _context.Passengers.Add(passenger);
@@ -153,7 +154,7 @@ namespace RailwayReservationMVC.Controllers
             }
 
             var passengers = _context.Passengers
-                .Where(p => p.ReservationID == reservation.PNRNo)
+                .Where(p => p.PNRNo == reservation.PNRNo)
                 .Select(p => new Passenger
                 {
                     Name = p.Name,
@@ -177,12 +178,20 @@ namespace RailwayReservationMVC.Controllers
             return View(viewModel);
         }
 
-        // ✅ Method to generate unique PNR number
-        private string GeneratePNR(ReservationViewModel model)
+        // ✅ Generate unique PNR number automatically (using random 6 digits)
+        private int GeneratePNR()
         {
             var random = new Random();
-            // PNR format: "TrainID+UserID+Date+RandomNumber"
-            string pnr = $"{model.TrainID}{model.Email.GetHashCode()}{model.JourneyDate:yyyyMMdd}{random.Next(1000, 9999)}";
+
+            // ✅ Generate 6-digit random number for PNR
+            int pnr = random.Next(100000, 999999);
+
+            // ✅ Ensure PNR is unique (regenerate if necessary)
+            while (_context.Reservations.Any(r => r.PNRNo == pnr))
+            {
+                pnr = random.Next(100000, 999999);
+            }
+
             return pnr;
         }
     }

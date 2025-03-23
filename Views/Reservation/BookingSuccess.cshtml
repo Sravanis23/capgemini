@@ -1,4 +1,4 @@
-@model RailwayReservationMVC.Models.Reservation
+@model RailwayReservationMVC.Models.ViewModels.BookingSuccessViewModel
 
 <h2>Booking Successful!</h2>
 
@@ -35,14 +35,17 @@
         else
         {
             <tr>
-                <td colspan="3">No passengers found.</td>
+                <td colspan="4" class="text-center">No passengers found.</td>
             </tr>
         }
     </tbody>
 </table>
 
-<p>A confirmation email has been sent to: @Model.Email</p>
+<p>A confirmation email has been sent to: <strong>@Model.Email</strong></p>
 
-<a href="@Url.Action("Book", "Reservation", new { trainId = Model.TrainID })">Book Another Ticket</a>
-<!-- Add a button to go back to homepage -->
+<!-- Book another ticket link (Removed trainId as it's not in ViewModel) -->
+<a href="@Url.Action("Book", "Reservation")" class="btn btn-secondary">Book Another Ticket</a>
+
+
+
 <a href="/" class="btn btn-primary">Go to Home</a>

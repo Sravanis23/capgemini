@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // 🔹 Configure Database (SQL Server) using appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 🔹 Register Services
 builder.Services.AddScoped<QuotaService>();  // ✅ Register QuotaService
