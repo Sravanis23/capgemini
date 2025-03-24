@@ -24,6 +24,6 @@ namespace RailwayReservationMVC.Models.ViewModels
 
         [Required]
         public string CancellationStatus { get; set; } = string.Empty; 
-        public List<Passenger> Passengers { get; set; } = new List<Passenger>(); // ✅ FIXED: Added Property
+        public List<Passenger> Passengers { get; set; } = new List<Passenger>(); 
     }
 }

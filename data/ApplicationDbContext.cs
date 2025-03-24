@@ -16,43 +16,39 @@ namespace RailwayReservationMVC.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Passenger>()
-            .HasKey(p => p.PassengerID);  // ✅ Explicitly defining the PK
+            .HasKey(p => p.PassengerID);  
 
-            // ✅ Define precision for Fare in Train table
             modelBuilder.Entity<Train>()
                 .Property(t => t.Fare)
-                .HasColumnType("decimal(10,2)"); // Precision: 10 digits, 2 decimal places
+                .HasColumnType("decimal(10,2)"); 
 
-            // ✅ Define precision for TotalFare in Reservation table
             modelBuilder.Entity<Reservation>()
                 .Property(r => r.TotalFare)
-                .HasColumnType("decimal(10,2)"); // Prevents truncation issues
+                .HasColumnType("decimal(10,2)");
 
-            // ✅ Define Quota relationship with Train
+ 
             modelBuilder.Entity<Quota>()
                 .HasOne(q => q.Train)
-                .WithMany(t => t.Quotas)  // ✅ Train can have multiple quotas
+                .WithMany(t => t.Quotas) 
                 .HasForeignKey(q => q.TrainID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ✅ Define Reservation relationship with Train
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Train)
-                .WithMany(t => t.Reservations)  // ✅ Train can have multiple reservations
+                .WithMany(t => t.Reservations)  
                 .HasForeignKey(r => r.TrainID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ✅ Define Reservation relationship with Quota
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Quota)
-                .WithMany(q => q.Reservations)  // ✅ Quota can be used in multiple reservations
+                .WithMany(q => q.Reservations) 
                 .HasForeignKey(r => r.QuotaID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ✅ Define Passenger relationship with Reservation
+
             modelBuilder.Entity<Passenger>()
                 .HasOne(p => p.Reservation)
-                .WithMany(r => r.Passengers)  // ✅ Reservation can have multiple passengers
+                .WithMany(r => r.Passengers)  
                 .HasForeignKey(p => p.PNRNo)
                 .OnDelete(DeleteBehavior.Cascade);
 

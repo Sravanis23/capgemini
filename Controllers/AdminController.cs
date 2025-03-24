@@ -21,7 +21,7 @@ namespace RailwayReservationMVC.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var trains = _context.Trains.ToList(); // Fetch from DB
+            var trains = _context.Trains.ToList(); 
             return View(trains);
         }
 

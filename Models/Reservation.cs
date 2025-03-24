@@ -11,10 +11,10 @@ namespace RailwayReservationMVC.Models
         public int PNRNo { get; set; } 
         
         [ForeignKey("Train")]
-        public int TrainID { get; set; } // Foreign Key from Trains Table
+        public int TrainID { get; set; }
 
         [ForeignKey("Quota")]
-        public int QuotaID { get; set; } // Foreign Key from Quota Table
+        public int QuotaID { get; set; } 
 
         public DateTime JourneyDate { get; set; }
         public string ClassType { get; set; } = string.Empty;
@@ -25,10 +25,7 @@ namespace RailwayReservationMVC.Models
         public int SeatsBooked { get; set; }
         public string Email { get; set; } = string.Empty;
 
-        // ✅ Add a list of passengers to store multiple passengers per reservation
         public virtual List<Passenger> Passengers { get; set; } = new List<Passenger>();
-
-        // Navigation properties
         public virtual Train? Train { get; set; }
         public virtual Quota? Quota { get; set; }
     }

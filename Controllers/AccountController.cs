@@ -19,14 +19,12 @@ namespace RailwayReservationMVC.Controllers
             _logger = logger;
         }
 
-        // GET: Register Page
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        // POST: Register User
         [HttpPost]
         public IActionResult Register(RegisterViewModel model)
         {
@@ -36,7 +34,6 @@ namespace RailwayReservationMVC.Controllers
                 return View();
             }
 
-            // ✅ Hash the password before saving
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password ?? "");
 
             var newUser = new User
@@ -48,20 +45,19 @@ namespace RailwayReservationMVC.Controllers
             };
 
             _context.Users.Add(newUser);
-            _context.SaveChanges();  // ✅ Save user to the database
+            _context.SaveChanges(); 
 
             _logger.LogInformation($"✅ New User Registered: {model.Email}");
             return RedirectToAction("Login");
         }
 
-        // GET: Login Page
+
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        // POST: Login User
         [HttpPost]
         public IActionResult Login(LoginModel model)
         {
@@ -80,7 +76,6 @@ namespace RailwayReservationMVC.Controllers
             {
                 var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
 
-                // 🔴 Check if user exists
                 if (user == null)
                 {
                     ViewBag.Error = "Invalid email or password!";
@@ -88,7 +83,6 @@ namespace RailwayReservationMVC.Controllers
                     return View();
                 }
 
-                // 🔴 Check if PasswordHash is empty
                 if (string.IsNullOrEmpty(user.PasswordHash))
                 {
                     ViewBag.Error = "Password not set. Please reset your password.";
@@ -96,7 +90,6 @@ namespace RailwayReservationMVC.Controllers
                     return View();
                 }
 
-                // 🔴 Check if stored password is a valid BCrypt hash
                 if (!user.PasswordHash.StartsWith("$2a$"))
                 {
                     ViewBag.Error = "Invalid stored password format.";
@@ -104,7 +97,6 @@ namespace RailwayReservationMVC.Controllers
                     return View();
                 }
 
-                // ✅ Verify the password using BCrypt
                 if (!BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
                 {
                     ViewBag.Error = "Invalid email or password!";
@@ -112,7 +104,6 @@ namespace RailwayReservationMVC.Controllers
                     return View();
                 }
 
-                // ✅ Login successful
                 HttpContext.Session.SetString("UserRole", "User");
                 HttpContext.Session.SetString("Username", user.Username);
                 _logger.LogInformation($"✅ User Login Successful: {user.Username}");

@@ -97,5 +97,10 @@ else
 </form>
 
 
+<form asp-action="Cancel" asp-controller="Reservation" method="post">
+    <input type="hidden" name="pnrNo" value="@Model.PNRNo" />
+    <button type="submit" class="btn btn-danger">Cancel Ticket</button>
+</form>
+
 <a href="@Url.Action("CheckStatus", "Reservation")" class="btn btn-secondary">Check Another PNR</a>
 <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Go to Home</a>

@@ -260,7 +260,7 @@ public IActionResult CheckStatus()
 public IActionResult CheckStatus(int pnrNo)
 {
     var reservation = _context.Reservations
-        .Include(r => r.Passengers) // Include related passengers
+        .Include(r => r.Passengers)
         .FirstOrDefault(r => r.PNRNo == pnrNo);
 
     if (reservation == null)
@@ -270,7 +270,7 @@ public IActionResult CheckStatus(int pnrNo)
     }
     if (reservation.JourneyDate == null)
     {
-        reservation.JourneyDate = DateTime.MinValue; // Default value to avoid errors
+        reservation.JourneyDate = DateTime.MinValue; 
     }
 
     return View("ReservationStatus", reservation);
@@ -285,7 +285,6 @@ public IActionResult MakePayment(int pnrNo)
         return NotFound("Reservation not found.");
     }
 
-    // Simulate payment processing (You can integrate Razorpay, Stripe, PayU, etc.)
     reservation.PaymentStatus = "Completed";
 
     _context.SaveChanges();
@@ -310,10 +309,8 @@ public IActionResult UpdateTotalFare(int reservationId)
         return NotFound("Train not found.");
     }
 
-    // Calculate Total Fare
     reservation.TotalFare = train.Fare * reservation.SeatsBooked;
-
-    // Update the database
+ 
     _context.Reservations.Update(reservation);
     _context.SaveChanges();
 
@@ -330,7 +327,6 @@ public IActionResult Create(Reservation reservation)
         return NotFound("Train not found.");
     }
 
-    // Calculate Total Fare before saving
     reservation.TotalFare = train.Fare * reservation.SeatsBooked;
 
     _context.Reservations.Add(reservation);

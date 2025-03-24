@@ -17,10 +17,8 @@ namespace RailwayReservationMVC.Models
         public decimal Fare { get; set; }
         public int SeatsAvailable { get; set; }
 
-        // ✅ Navigation property for Quotas (One Train → Many Quotas)
         public virtual List<Quota> Quotas { get; set; } = new List<Quota>();
 
-        // ✅ Navigation property for Reservations (One Train → Many Reservations)
         public virtual List<Reservation> Reservations { get; set; } = new List<Reservation>();
     }
 }
