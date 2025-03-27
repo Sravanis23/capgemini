@@ -14,13 +14,17 @@ namespace RailwayReservationMVC.Controllers
         private readonly ApplicationDbContext _context;
         private readonly QuotaService _quotaService;
 
+/*************  ✨ Codeium Command ⭐  *************/
+        /// <summary>
+        /// Constructor for ReservationController. 
+        /// </summary>
+/******  7a50db61-1e22-4359-835e-b232dbbaa9ff  *******/
         public ReservationController(ApplicationDbContext context, QuotaService quotaService)
         {
             _context = context;
             _quotaService = quotaService;
         }
 
-        // ✅ Step 1: Booking Form
         [HttpGet]
         public IActionResult Book(int trainId)
         {
@@ -31,7 +35,7 @@ namespace RailwayReservationMVC.Controllers
             }
 
             var quotas = _context.Quota
-                .Where(q => q.TrainID == trainId)
+                .Where(q => q.TrainID == trainId && q.SeatsAvailable > 0)
                 .ToList();
 
             var classTypes = new List<string> { "Sleeper", "3rd AC", "2nd AC", "1st AC", "Economy", "Business" };
@@ -47,8 +51,7 @@ namespace RailwayReservationMVC.Controllers
 
             return View(viewModel);
         }
-
-        // ✅ Step 2: Process Booking
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Book(ReservationViewModel model)
@@ -81,13 +84,11 @@ namespace RailwayReservationMVC.Controllers
                 return View(model);
             }
 
-            // ✅ Allocate seats
             _quotaService.AllocateSeats(model.TrainID, model.QuotaID, totalSeatsRequested);
 
-            // ✅ Generate Unique PNR Automatically
             int pnrNo = GeneratePNR();
 
-            // ✅ Create and save reservation
+
             var reservation = new Reservation
             {
                 PNRNo = pnrNo,
@@ -106,12 +107,10 @@ namespace RailwayReservationMVC.Controllers
             {
                 try
                 {
-                    // ✅ Add reservation first
-                    
+ 
                     _context.Reservations.Add(reservation);
                     _context.SaveChanges();
 
-                    // ✅ Add passengers after saving reservation to get valid PNRNo
                     foreach (var passengerVM in model.Passengers)
                     {
                         var passenger = new Passenger
@@ -126,6 +125,8 @@ namespace RailwayReservationMVC.Controllers
                         _context.Passengers.Add(passenger);
                     }
 
+                  quota.SeatsAvailable -= totalSeatsRequested;
+            _context.Quota.Update(quota);
                     _context.SaveChanges();
                     transaction.Commit();
                 }
@@ -142,8 +143,7 @@ namespace RailwayReservationMVC.Controllers
 
         
 
-        
-        // ✅ Step 3: Booking Success Page
+    
         [HttpGet]
         public IActionResult BookingSuccess(int pnrNo)
         {

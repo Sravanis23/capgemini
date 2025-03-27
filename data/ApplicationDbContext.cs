@@ -10,8 +10,7 @@ namespace RailwayReservationMVC.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Train> Trains { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
-        public DbSet<Quota> Quota { get; set; }  // ✅ Correctly named as "Quotas"
-        public DbSet<Passenger> Passengers { get; set; }
+        public DbSet<Quota> Quota { get; set; }          public DbSet<Passenger> Passengers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,6 +20,10 @@ namespace RailwayReservationMVC.Data
             modelBuilder.Entity<Train>()
                 .Property(t => t.Fare)
                 .HasColumnType("decimal(10,2)"); 
+
+                 modelBuilder.Entity<Train>()
+        .Property(t => t.DepartureTime)
+        .HasColumnType("datetime2");
 
             modelBuilder.Entity<Reservation>()
                 .Property(r => r.TotalFare)
